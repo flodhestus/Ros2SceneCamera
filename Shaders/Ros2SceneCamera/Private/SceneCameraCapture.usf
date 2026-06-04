@@ -1,0 +1,23 @@
+#include "/Engine/Private/Common.ush"
+
+Texture2D InputTexture;
+SamplerState InputSampler;
+RWStructuredBuffer<uint> OutPackedRgb;
+uint2 InputSize;
+
+[numthreads(8, 8, 1)]
+void SceneCameraCaptureCS(uint3 DTid : SV_DispatchThreadID)
+{
+	uint2 P = DTid.xy;
+	if (P.x >= InputSize.x || P.y >= InputSize.y)
+	{
+		return;
+	}
+	const float2 UV = (float2(P) + 0.5f) / float2(InputSize);
+	const float4 C = InputTexture.SampleLevel(InputSampler, UV, 0);
+	const uint R = (uint)(saturate(C.r) * 255.0);
+	const uint G = (uint)(saturate(C.g) * 255.0);
+	const uint B = (uint)(saturate(C.b) * 255.0);
+	const uint Idx = P.y * InputSize.x + P.x;
+	OutPackedRgb[Idx] = R | (G << 8u) | (B << 16u);
+}
