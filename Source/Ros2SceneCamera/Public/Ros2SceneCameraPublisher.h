@@ -28,8 +28,8 @@ public:
 	UPROPERTY(EditAnywhere, Category = "ROS2 Camera")
 	FString FrameId = TEXT("camera_link");
 
-	UPROPERTY(EditAnywhere, Category = "ROS2 Camera", meta = (ClampMin = "1", ClampMax = "120"))
-	float PublishRateHz = 60.f;
+	UPROPERTY(EditAnywhere, Category = "ROS2 Camera", meta = (ClampMin = "1", ClampMax = "60"))
+	float PublishRateHz = 20.f;
 
 	UPROPERTY(EditAnywhere, Category = "ROS2 Camera", meta = (ClampMin = "640", ClampMax = "1920"))
 	int32 ImageWidth = ROS2_CAMERA_FULLHD_WIDTH;

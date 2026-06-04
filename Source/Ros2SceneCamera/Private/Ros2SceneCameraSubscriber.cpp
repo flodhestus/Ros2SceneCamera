@@ -17,7 +17,7 @@ void ARos2SceneCameraSubscriber::BeginPlay()
 	if (!FRos2SceneCameraDds::CreateImageReader(TopicName, DdsReader)) { bEnabled = false; return; }
 	Viewport = MakeShared<FRos2ImageViewport>();
 	Viewport->StartViewport(ViewportTitle);
-	GetWorld()->GetTimerManager().SetTimer(PollTimer, this, &ARos2SceneCameraSubscriber::PollDds, 0.016f, true);
+	GetWorld()->GetTimerManager().SetTimer(PollTimer, this, &ARos2SceneCameraSubscriber::PollDds, 0.05f, true);
 }
 
 void ARos2SceneCameraSubscriber::EndPlay(const EEndPlayReason::Type EndPlayReason)

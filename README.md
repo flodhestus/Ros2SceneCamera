@@ -29,9 +29,9 @@ If the compute shader is not available, a CPU **ReadPixels** fallback is used.
 | Setting | Default | Notes |
 |---------|---------|--------|
 | Resolution | **1920×1080** (default) | Full HD rgb8 ≈ **6.2 MB**/frame |
-| Publish rate | **60 Hz** (tick-driven) | Lower `PublishRateHz` if PIE GPU bound |
+| Publish rate | **20 Hz** (tick-driven, default) | Raise `PublishRateHz` only if GPU headroom allows |
 | GPU path | Pooled readback, no per-frame alloc | `bCaptureEveryFrame` keeps RT hot |
-| DDS | Async publish on worker thread | Subscriber polls at **60 Hz** |
+| DDS | Async publish on worker thread | Subscriber polls at **20 Hz** |
 
 Scene capture + 1080p readback dominate cost; tune `PublishRateHz` for your GPU.
 
