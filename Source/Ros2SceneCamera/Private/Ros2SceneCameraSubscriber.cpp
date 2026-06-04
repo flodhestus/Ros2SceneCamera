@@ -17,7 +17,7 @@ void ARos2SceneCameraSubscriber::BeginPlay()
 	if (!FRos2SceneCameraDds::CreateImageReader(TopicName, DdsReader)) { bEnabled = false; return; }
 	Viewport = MakeShared<FRos2ImageViewport>();
 	Viewport->StartViewport(ViewportTitle);
-	GetWorld()->GetTimerManager().SetTimer(PollTimer, this, &ARos2SceneCameraSubscriber::PollDds, 0.033f, true);
+	GetWorld()->GetTimerManager().SetTimer(PollTimer, this, &ARos2SceneCameraSubscriber::PollDds, 0.016f, true);
 }
 
 void ARos2SceneCameraSubscriber::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -36,7 +36,7 @@ void ARos2SceneCameraSubscriber::PollDds()
 		if (!Self || !Self->bEnabled || Self->DdsReader <= 0) { return; }
 		FRos2ImageFrame Frame;
 		if (!FRos2SceneCameraDds::TakeLatestImage(Self->DdsReader, Frame)) { return; }
-		AsyncTask(ENamedThreads::GameThread, [WeakThis, Frame]() mutable
+		AsyncTask(ENamedThreads::GameThread, [WeakThis, Frame = MoveTemp(Frame)]() mutable
 		{
 			if (ARos2SceneCameraSubscriber* Sub = WeakThis.Get()) { Sub->OnFrame(Frame); }
 		});

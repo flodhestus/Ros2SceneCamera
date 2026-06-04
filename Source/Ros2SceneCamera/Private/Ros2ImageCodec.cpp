@@ -69,3 +69,34 @@ bool FRos2ImageCodec::FillRgb8(
 	return false;
 #endif
 }
+
+bool FRos2ImageCodec::CommitImageMetadata(
+	sensor_msgs_msg_Image& Sample,
+	int32 Width,
+	int32 Height,
+	const FString& FrameId)
+{
+#if WITH_ROS2_SCENE_CAMERA_DDS
+	if (Width <= 0 || Height <= 0 || !Sample.data._buffer)
+	{
+		return false;
+	}
+	const uint32 Bytes = static_cast<uint32>(Width * Height * 3);
+	if (Bytes > Sample.data._maximum)
+	{
+		return false;
+	}
+	Sample.height = static_cast<uint32_t>(Height);
+	Sample.width = static_cast<uint32_t>(Width);
+	Sample.step = static_cast<uint32_t>(Width * 3);
+	Sample.data._length = Bytes;
+	Sample.header.stamp.sec = static_cast<int32_t>(FPlatformTime::Seconds());
+	Sample.header.stamp.nanosec = 0;
+	if (Sample.header.frame_id) { dds_free(Sample.header.frame_id); }
+	FTCHARToUTF8 FrameUtf8(*FrameId);
+	Sample.header.frame_id = DupAnsi(FrameUtf8.Get());
+	return true;
+#else
+	return false;
+#endif
+}

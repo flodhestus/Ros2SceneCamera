@@ -114,7 +114,7 @@ uint32 FRos2ImageViewport::Run()
 		}
 		RenderLocked();
 		SwapBuffers(Hdc);
-		Sleep(8);
+		Sleep(1);
 	}
 	wglMakeCurrent(nullptr, nullptr);
 	wglDeleteContext(Glrc);

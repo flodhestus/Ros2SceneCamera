@@ -4,8 +4,16 @@
 
 class UTextureRenderTarget2D;
 
+/** Persistent GPU RGB8 capture pipeline (compute + pooled readback). */
 class ROS2SCENECAMERA_API FSceneCameraCapture
 {
 public:
-	static bool CaptureRgb8(UTextureRenderTarget2D* RenderTarget, TArray<uint8>& OutRgb, int32& OutWidth, int32& OutHeight);
+	static void Init(int32 Width, int32 Height);
+	static void Shutdown();
+	static bool CaptureRgb8Into(
+		UTextureRenderTarget2D* RenderTarget,
+		uint8* Dest,
+		int32 DestCapacityBytes,
+		int32& OutWidth,
+		int32& OutHeight);
 };

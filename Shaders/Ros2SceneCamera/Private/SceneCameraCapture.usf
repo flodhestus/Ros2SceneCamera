@@ -1,11 +1,10 @@
 #include "/Engine/Private/Common.ush"
 
-Texture2D InputTexture;
-SamplerState InputSampler;
-RWStructuredBuffer<uint> OutPackedRgb;
+Texture2D<float4> InputTexture;
+RWByteAddressBuffer OutRgb8;
 uint2 InputSize;
 
-[numthreads(8, 8, 1)]
+[numthreads(THREADGROUP_SIZE, THREADGROUP_SIZE, 1)]
 void SceneCameraCaptureCS(uint3 DTid : SV_DispatchThreadID)
 {
 	uint2 P = DTid.xy;
@@ -13,11 +12,12 @@ void SceneCameraCaptureCS(uint3 DTid : SV_DispatchThreadID)
 	{
 		return;
 	}
-	const float2 UV = (float2(P) + 0.5f) / float2(InputSize);
-	const float4 C = InputTexture.SampleLevel(InputSampler, UV, 0);
+	const float4 C = InputTexture.Load(int3(P, 0));
 	const uint R = (uint)(saturate(C.r) * 255.0);
 	const uint G = (uint)(saturate(C.g) * 255.0);
 	const uint B = (uint)(saturate(C.b) * 255.0);
-	const uint Idx = P.y * InputSize.x + P.x;
-	OutPackedRgb[Idx] = R | (G << 8u) | (B << 16u);
+	const uint ByteBase = (P.y * InputSize.x + P.x) * 3u;
+	OutRgb8.Store(ByteBase, R);
+	OutRgb8.Store(ByteBase + 1u, G);
+	OutRgb8.Store(ByteBase + 2u, B);
 }

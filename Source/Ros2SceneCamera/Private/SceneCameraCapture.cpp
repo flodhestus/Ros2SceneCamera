@@ -1,4 +1,5 @@
 #include "SceneCameraCapture.h"
+#include "Ros2SceneCameraTypes.h"
 #include "Engine/TextureRenderTarget2D.h"
 #include "GlobalShader.h"
 #include "RenderGraphBuilder.h"
@@ -12,15 +13,20 @@ public:
 	SHADER_USE_PARAMETER_STRUCT(FSceneCameraCaptureCS, FGlobalShader);
 
 	BEGIN_SHADER_PARAMETER_STRUCT(FParameters, )
-		SHADER_PARAMETER_RDG_TEXTURE(Texture2D, InputTexture)
-		SHADER_PARAMETER_SAMPLER(SamplerState, InputSampler)
-		SHADER_PARAMETER_RDG_BUFFER_UAV(RWStructuredBuffer<uint>, OutPackedRgb)
+		SHADER_PARAMETER_RDG_TEXTURE(Texture2D<float4>, InputTexture)
+		SHADER_PARAMETER_RDG_BUFFER_UAV(RWByteAddressBuffer, OutRgb8)
 		SHADER_PARAMETER(FUintVector2, InputSize)
 	END_SHADER_PARAMETER_STRUCT()
 
 	static bool ShouldCompilePermutation(const FGlobalShaderPermutationParameters& Parameters)
 	{
 		return IsFeatureLevelSupported(Parameters.Platform, ERHIFeatureLevel::SM5);
+	}
+
+	static void ModifyCompilationEnvironment(const FGlobalShaderPermutationParameters& Parameters, FShaderCompilerEnvironment& OutEnvironment)
+	{
+		FGlobalShader::ModifyCompilationEnvironment(Parameters, OutEnvironment);
+		OutEnvironment.SetDefine(TEXT("THREADGROUP_SIZE"), 16);
 	}
 };
 
@@ -30,103 +36,116 @@ IMPLEMENT_GLOBAL_SHADER(
 	"SceneCameraCaptureCS",
 	SF_Compute);
 
-static void UnpackPackedPixels(const TArray<uint32>& Packed, TArray<uint8>& OutRgb)
+namespace
 {
-	OutRgb.SetNumUninitialized(Packed.Num() * 3);
-	for (int32 i = 0; i < Packed.Num(); ++i)
+	int32 GCachedW = 0;
+	int32 GCachedH = 0;
+	FRHIGPUBufferReadback* GReadbacks[2] = { nullptr, nullptr };
+	int32 GReadbackToggle = 0;
+	FCriticalSection GCaptureLock;
+}
+
+void FSceneCameraCapture::Init(int32 Width, int32 Height)
+{
+	FScopeLock Lock(&GCaptureLock);
+	GCachedW = FMath::Clamp(Width, 1, ROS2_CAMERA_MAX_WIDTH);
+	GCachedH = FMath::Clamp(Height, 1, ROS2_CAMERA_MAX_HEIGHT);
+	for (int32 i = 0; i < 2; ++i)
 	{
-		const uint32 P = Packed[i];
-		OutRgb[i * 3 + 0] = static_cast<uint8>(P & 0xFF);
-		OutRgb[i * 3 + 1] = static_cast<uint8>((P >> 8) & 0xFF);
-		OutRgb[i * 3 + 2] = static_cast<uint8>((P >> 16) & 0xFF);
+		if (!GReadbacks[i])
+		{
+			GReadbacks[i] = new FRHIGPUBufferReadback(TEXT("SceneCameraReadback"));
+		}
 	}
 }
 
-static bool ReadPixelsCpu(FTextureRenderTargetResource* Resource, int32 Width, int32 Height, TArray<uint8>& OutRgb)
+void FSceneCameraCapture::Shutdown()
 {
-	TArray<FColor> Surface;
-	Resource->ReadPixels(Surface, FReadSurfaceDataFlags());
-	if (Surface.Num() < Width * Height) { return false; }
-	OutRgb.SetNumUninitialized(Width * Height * 3);
-	for (int32 i = 0; i < Width * Height; ++i)
+	FScopeLock Lock(&GCaptureLock);
+	for (int32 i = 0; i < 2; ++i)
 	{
-		OutRgb[i * 3 + 0] = Surface[i].R;
-		OutRgb[i * 3 + 1] = Surface[i].G;
-		OutRgb[i * 3 + 2] = Surface[i].B;
+		delete GReadbacks[i];
+		GReadbacks[i] = nullptr;
 	}
-	return true;
+	GCachedW = 0;
+	GCachedH = 0;
 }
 
-bool FSceneCameraCapture::CaptureRgb8(
+bool FSceneCameraCapture::CaptureRgb8Into(
 	UTextureRenderTarget2D* RenderTarget,
-	TArray<uint8>& OutRgb,
+	uint8* Dest,
+	int32 DestCapacityBytes,
 	int32& OutWidth,
 	int32& OutHeight)
 {
-	if (!RenderTarget) { return false; }
+	if (!RenderTarget || !Dest) { return false; }
 	FTextureRenderTargetResource* Resource = RenderTarget->GameThread_GetRenderTargetResource();
 	if (!Resource) { return false; }
 
 	OutWidth = RenderTarget->SizeX;
 	OutHeight = RenderTarget->SizeY;
-	const int32 PixelCount = OutWidth * OutHeight;
-	if (PixelCount <= 0) { return false; }
+	const int32 Bytes = OutWidth * OutHeight * 3;
+	if (Bytes <= 0 || Bytes > DestCapacityBytes || Bytes > ROS2_CAMERA_MAX_BYTES) { return false; }
 
 	TShaderMapRef<FSceneCameraCaptureCS> ComputeShader(GetGlobalShaderMap(GMaxRHIFeatureLevel));
-	if (!ComputeShader.IsValid())
-	{
-		return ReadPixelsCpu(Resource, OutWidth, OutHeight, OutRgb);
-	}
+	if (!ComputeShader.IsValid()) { return false; }
 
-	TArray<uint32> Packed;
-	Packed.SetNumZeroed(PixelCount);
+	FRHIGPUBufferReadback* Readback = nullptr;
+	{
+		FScopeLock Lock(&GCaptureLock);
+		Readback = GReadbacks[GReadbackToggle & 1];
+		GReadbackToggle++;
+	}
+	if (!Readback) { return false; }
+
 	FEvent* Done = FPlatformProcess::GetSynchEventFromPool(true);
 
 	ENQUEUE_RENDER_COMMAND(SceneCameraCapture)(
-		[Resource, &Packed, OutWidth, OutHeight, ComputeShader, Done](FRHICommandListImmediate& RHICmdList)
+		[Resource, OutWidth, OutHeight, Bytes, ComputeShader, Readback, Done](FRHICommandListImmediate& RHICmdList)
 		{
 			FRDGBuilder GraphBuilder(RHICmdList);
 			FRDGTextureRef InputTexture = GraphBuilder.RegisterExternalTexture(
 				CreateRenderTarget(Resource->GetRenderTargetTexture(), TEXT("SceneCameraInput")));
 			FRDGBufferRef OutputBuffer = GraphBuilder.CreateBuffer(
-				FRDGBufferDesc::CreateStructuredDesc(sizeof(uint32), static_cast<uint32>(OutWidth * OutHeight)),
-				TEXT("SceneCameraPacked"));
+				FRDGBufferDesc::CreateByteAddressDesc(static_cast<uint32>(Bytes)),
+				TEXT("SceneCameraRgb8"));
 
 			FSceneCameraCaptureCS::FParameters* Params = GraphBuilder.AllocParameters<FSceneCameraCaptureCS::FParameters>();
 			Params->InputTexture = InputTexture;
-			Params->InputSampler = TStaticSamplerState<SF_Bilinear, AM_Clamp, AM_Clamp, AM_Clamp>::GetRHI();
-			Params->OutPackedRgb = GraphBuilder.CreateUAV(OutputBuffer);
+			Params->OutRgb8 = GraphBuilder.CreateUAV(OutputBuffer);
 			Params->InputSize = FUintVector2(static_cast<uint32>(OutWidth), static_cast<uint32>(OutHeight));
 
 			FComputeShaderUtils::AddPass(
-				GraphBuilder, RDG_EVENT_NAME("SceneCameraCaptureCS"), ComputeShader, Params,
-				FIntVector(FMath::DivideAndRoundUp(OutWidth, 8), FMath::DivideAndRoundUp(OutHeight, 8), 1));
+				GraphBuilder,
+				RDG_EVENT_NAME("SceneCameraCaptureCS"),
+				ComputeShader,
+				Params,
+				FIntVector(
+					FMath::DivideAndRoundUp(OutWidth, 16),
+					FMath::DivideAndRoundUp(OutHeight, 16),
+					1));
 
-			FRHIGPUBufferReadback* Readback = new FRHIGPUBufferReadback(TEXT("SceneCameraReadback"));
 			AddEnqueueCopyPass(GraphBuilder, Readback, OutputBuffer, 0u);
 			GraphBuilder.Execute();
 
 			RHICmdList.ImmediateFlush(EImmediateFlushType::FlushRHIThread);
-			const double Deadline = FPlatformTime::Seconds() + 2.0;
-			while (!Readback->IsReady() && FPlatformTime::Seconds() < Deadline)
-			{
-				FPlatformProcess::SleepNoStats(0.0005f);
-			}
-			if (Readback->IsReady())
-			{
-				const uint32 Bytes = static_cast<uint32>(Packed.Num() * sizeof(uint32));
-				if (void* Data = Readback->Lock(Bytes))
-				{
-					FMemory::Memcpy(Packed.GetData(), Data, Bytes);
-					Readback->Unlock();
-				}
-			}
-			delete Readback;
 			Done->Trigger();
 		});
 
 	Done->Wait();
 	FPlatformProcess::ReturnSynchEventToPool(Done);
-	UnpackPackedPixels(Packed, OutRgb);
-	return OutRgb.Num() == PixelCount * 3;
+
+	const double Deadline = FPlatformTime::Seconds() + 1.0;
+	while (!Readback->IsReady() && FPlatformTime::Seconds() < Deadline)
+	{
+		FPlatformProcess::SleepNoStats(0.0);
+	}
+	if (!Readback->IsReady()) { return false; }
+
+	if (void* Data = Readback->Lock(static_cast<uint32>(Bytes)))
+	{
+		FMemory::Memcpy(Dest, Data, Bytes);
+		Readback->Unlock();
+	}
+	return true;
 }

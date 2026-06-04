@@ -17,8 +17,8 @@ Both actors are spawned automatically in the editor when you press **Play**.
 
 ## GPU path
 
-1. **`USceneCaptureComponent2D`** renders **Final Color LDR** to a render target (default **960×540**).
-2. **`SceneCameraCapture.usf`** compute shader (`8×8` threads) samples the RT and packs **RGB8**.
+1. **`USceneCaptureComponent2D`** renders **Final Color LDR** to a **1920×1080** `PF_B8G8R8A8` render target (Full HD default).
+2. **`SceneCameraCapture.usf`** compute shader (`16×16` threads, texel `Load`) writes **RGB8** via byte-address UAV — one GPU readback, one memcpy into the DDS buffer.
 3. **`sensor_msgs/Image`** (`encoding: rgb8`) is written with CycloneDDS (default QoS).
 4. Subscriber decodes the image and draws it in an OpenGL Win32 window.
 
@@ -28,11 +28,12 @@ If the compute shader is not available, a CPU **ReadPixels** fallback is used.
 
 | Setting | Default | Notes |
 |---------|---------|--------|
-| Resolution | 960×540 | Lower for lighter PIE |
-| Publish rate | 15 Hz | Increase up to ~30 Hz on fast GPUs |
-| Payload | W×H×3 bytes | Scales with resolution |
+| Resolution | **1920×1080** (default) | Full HD rgb8 ≈ **6.2 MB**/frame |
+| Publish rate | **60 Hz** (tick-driven) | Lower `PublishRateHz` if PIE GPU bound |
+| GPU path | Pooled readback, no per-frame alloc | `bCaptureEveryFrame` keeps RT hot |
+| DDS | Async publish on worker thread | Subscriber polls at **60 Hz** |
 
-Scene capture cost dominates; DDS and the viewer are relatively cheap.
+Scene capture + 1080p readback dominate cost; tune `PublishRateHz` for your GPU.
 
 ## Requirements
 

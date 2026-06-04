@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Ros2SceneCameraTypes.h"
 #include "Ros2SceneCameraPublisher.generated.h"
 
 class USceneCaptureComponent2D;
@@ -16,6 +17,7 @@ public:
 	ARos2SceneCameraPublisher();
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+	virtual void Tick(float DeltaSeconds) override;
 
 	UPROPERTY(EditAnywhere, Category = "ROS2 Camera")
 	bool bEnabled = true;
@@ -26,17 +28,21 @@ public:
 	UPROPERTY(EditAnywhere, Category = "ROS2 Camera")
 	FString FrameId = TEXT("camera_link");
 
-	UPROPERTY(EditAnywhere, Category = "ROS2 Camera", meta = (ClampMin = "1", ClampMax = "60"))
-	float PublishRateHz = 15.f;
+	UPROPERTY(EditAnywhere, Category = "ROS2 Camera", meta = (ClampMin = "1", ClampMax = "120"))
+	float PublishRateHz = 60.f;
 
-	UPROPERTY(EditAnywhere, Category = "ROS2 Camera", meta = (ClampMin = "160", ClampMax = "1920"))
-	int32 ImageWidth = 960;
+	UPROPERTY(EditAnywhere, Category = "ROS2 Camera", meta = (ClampMin = "640", ClampMax = "1920"))
+	int32 ImageWidth = ROS2_CAMERA_FULLHD_WIDTH;
 
-	UPROPERTY(EditAnywhere, Category = "ROS2 Camera", meta = (ClampMin = "120", ClampMax = "1080"))
-	int32 ImageHeight = 540;
+	UPROPERTY(EditAnywhere, Category = "ROS2 Camera", meta = (ClampMin = "480", ClampMax = "1080"))
+	int32 ImageHeight = ROS2_CAMERA_FULLHD_HEIGHT;
+
+	/** Drive scene capture every frame (pairs with high publish rate). */
+	UPROPERTY(EditAnywhere, Category = "ROS2 Camera")
+	bool bCaptureEveryFrame = true;
 
 protected:
-	void OnTimer();
+	void CaptureAndPublish();
 	void ShutdownDds();
 
 	UPROPERTY(VisibleAnywhere, Category = "ROS2 Camera")
@@ -45,7 +51,7 @@ protected:
 	UPROPERTY(Transient)
 	TObjectPtr<UTextureRenderTarget2D> RenderTarget;
 
-	FTimerHandle TimerHandle;
+	float PublishAccumulator = 0.f;
 	int32 DdsWriter = 0;
 	void* DdsImageSample = nullptr;
 };
