@@ -12,7 +12,7 @@
 	"SupportedTargetPlatforms": [ "Win64" ],
 	"Plugins": [
 		{
-			"Name": "Ros2DdsShared",
+			"Name": "Lidar360GpuRayTracing",
 			"Enabled": true
 		}
 	],
