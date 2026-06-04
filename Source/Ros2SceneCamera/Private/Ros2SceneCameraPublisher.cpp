@@ -1,11 +1,12 @@
 #include "Ros2SceneCameraPublisher.h"
 #include "Components/SceneCaptureComponent2D.h"
 #include "Engine/TextureRenderTarget2D.h"
+#include "Lidar360Dds.h"
 #include "Ros2ImageCodec.h"
-#include "Ros2SceneCameraDds.h"
+#include "Ros2SensorCoordinator.h"
 #include "SceneCameraCapture.h"
 
-#if WITH_ROS2_SCENE_CAMERA_DDS
+#if WITH_ROS2_DDS
 THIRD_PARTY_INCLUDES_START
 #include "Image.h"
 THIRD_PARTY_INCLUDES_END
@@ -22,12 +23,12 @@ ARos2SceneCameraPublisher::ARos2SceneCameraPublisher()
 void ARos2SceneCameraPublisher::BeginPlay()
 {
 	Super::BeginPlay();
-	if (!bEnabled || !FRos2SceneCameraDds::Init())
+	if (!bEnabled || !FRos2SensorCoordinator::EnsureDdsInitialized())
 	{
 		bEnabled = false;
 		return;
 	}
-	if (!FRos2SceneCameraDds::CreateImageWriter(TopicName, DdsWriter))
+	if (!FLidar360Dds::CreateImageWriter(TopicName, DdsWriter))
 	{
 		bEnabled = false;
 		return;
@@ -37,7 +38,7 @@ void ARos2SceneCameraPublisher::BeginPlay()
 	ImageHeight = FMath::Clamp(ImageHeight, 480, ROS2_CAMERA_MAX_HEIGHT);
 	FSceneCameraCapture::Init(ImageWidth, ImageHeight);
 
-	DdsImageSample = FRos2SceneCameraDds::AllocImageSample();
+	DdsImageSample = FLidar360Dds::AllocImageSample();
 	if (DdsImageSample)
 	{
 		FRos2ImageCodec::InitImageSample(
@@ -75,10 +76,10 @@ void ARos2SceneCameraPublisher::Tick(float DeltaSeconds)
 
 void ARos2SceneCameraPublisher::ShutdownDds()
 {
-	FRos2SceneCameraDds::DestroyEndpoint(DdsWriter);
+	FLidar360Dds::DestroyEndpoint(DdsWriter);
 	if (DdsImageSample)
 	{
-		FRos2SceneCameraDds::FreeImageSample(static_cast<sensor_msgs_msg_Image*>(DdsImageSample));
+		FLidar360Dds::FreeImageSample(static_cast<sensor_msgs_msg_Image*>(DdsImageSample));
 		DdsImageSample = nullptr;
 	}
 }
@@ -105,5 +106,5 @@ void ARos2SceneCameraPublisher::CaptureAndPublish()
 		return;
 	}
 	if (!FRos2ImageCodec::CommitImageMetadata(*Sample, W, H, FrameId)) { return; }
-	FRos2SceneCameraDds::PublishImageAsync(DdsWriter, Sample);
+	FLidar360Dds::PublishImageAsync(DdsWriter, Sample);
 }

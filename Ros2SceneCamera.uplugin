@@ -10,6 +10,12 @@
 	"Installed": false,
 	"EngineVersion": "5.7.0",
 	"SupportedTargetPlatforms": [ "Win64" ],
+	"Plugins": [
+		{
+			"Name": "Ros2DdsShared",
+			"Enabled": true
+		}
+	],
 	"Modules": [
 		{
 			"Name": "Ros2SceneCamera",
@@ -19,7 +25,6 @@
 		}
 	],
 	"AdditionalFilesToPackage": [
-		"Shaders/Ros2SceneCamera/Private/SceneCameraCapture.usf",
-		"Config/CycloneDDS.xml"
+		"Shaders/Ros2SceneCamera/Private/SceneCameraCapture.usf"
 	]
 }
