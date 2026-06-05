@@ -2,7 +2,7 @@
 
 Standalone Unreal Engine 5.7 plugin: **scene camera** with **compute-shader** RGB8 capture, **`sensor_msgs/Image`** over **CycloneDDS**, and a **live preview window** on **Play**.
 
-Repository: [github.com/flodhestus/Ros2SceneCamera](https://github.com/flodhestus/Ros2SceneCamera)
+Repository: [github.com/flodhestus/Ros2SceneCamera](https://github.com/flodhestus/Ros2SceneCamera) · GitHub [@flodhestus](https://github.com/flodhestus)
 
 **No dependency** on Lidar360GpuRayTracing or Lidar360OptiX. **Not** a LiDAR plugin — camera actors do not use `Lidar360` naming. Includes its own CycloneDDS stack and `Config/CycloneDDS.xml`.
 
