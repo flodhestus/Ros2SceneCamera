@@ -1,31 +1,39 @@
 # ROS2 Scene Camera
 
-Unreal Engine 5.7 plugin: a **normal scene camera** that captures the view, runs a **compute shader** to pack RGB8, publishes **`sensor_msgs/Image`** over **CycloneDDS**, and shows a **live preview window** when you press **Play**.
+Standalone Unreal Engine 5.7 plugin: **scene camera** with **compute-shader** RGB8 capture, **`sensor_msgs/Image`** over **CycloneDDS**, and a **live preview window** on **Play**.
 
 Repository: [github.com/flodhestus/Ros2SceneCamera](https://github.com/flodhestus/Ros2SceneCamera)
 
-**Depends on:** [Lidar360GpuRayTracing](https://github.com/flodhestus/Lidar360GpuRayTracing) for the shared **`Ros2DdsShared`** module (single CycloneDDS participant). **Not** a LiDAR plugin — no `Lidar360` naming in camera actors.
+**No dependency** on Lidar360GpuRayTracing or Lidar360OptiX. **Not** a LiDAR plugin — camera actors do not use `Lidar360` naming. Includes its own CycloneDDS stack and `Config/CycloneDDS.xml`.
 
-Runs with **either** Gpu LiDAR or OptiX LiDAR on the same DDS stack. Only **three plugins** total in the stack.
+## On Play
 
-## On Play (PIE)
-
-| Role | Actor | DDS topic | Window |
-|------|--------|-----------|--------|
+| Role | Actor | DDS topic (default) | Window |
+|------|--------|---------------------|--------|
 | Publish | `ARos2SceneCameraPublisher` | `rt/sensor_image` | — |
 | Subscribe | `ARos2SceneCameraSubscriber` | `rt/sensor_image` | **Scene Camera** |
 
+## GPU path
+
+1. **`USceneCaptureComponent2D`** → **1920×1080** `PF_B8G8R8A8` render target (default).
+2. **`SceneCameraCapture.usf`** compute shader (16×16 threads) packs **RGB8** with pooled readback.
+3. **`sensor_msgs/Image`** (`rgb8`) published via CycloneDDS (default QoS).
+
 ## Defaults
 
-- **1920×1080**, **20 Hz** publish, compute-shader RGB8 path with pooled readback
+| Setting | Value |
+|---------|--------|
+| Resolution | 1920×1080 |
+| Publish rate | 20 Hz |
+| Capture | Every frame (`bCaptureEveryFrame`) |
 
 ## Quick start
 
-1. Enable **LiDAR 360 GPU Ray Tracing** (shared DDS) and **ROS2 Scene Camera**.
-2. Optionally enable **LiDAR 360 OptiX** instead of using GPU LiDAR publisher.
+1. Copy this folder into your project `Plugins/` directory.
+2. Enable **ROS2 Scene Camera**.
 3. Press **Play**.
 
-## Related
+## Optional companions (separate repos, no plugin dependency)
 
-- [Lidar360GpuRayTracing](https://github.com/flodhestus/Lidar360GpuRayTracing)  
-- [Lidar360OptiX](https://github.com/flodhestus/Lidar360OptiX)  
+- [Lidar360GpuRayTracing](https://github.com/flodhestus/Lidar360GpuRayTracing) — D3D12 RT LiDAR on `rt/sensor_pointcloud`  
+- [Lidar360OptiX](https://github.com/flodhestus/Lidar360OptiX) — OptiX LiDAR on `rt/sensor_pointcloud`  
