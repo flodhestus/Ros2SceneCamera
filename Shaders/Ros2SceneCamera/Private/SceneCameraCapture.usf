@@ -13,9 +13,10 @@ void SceneCameraCaptureCS(uint3 DTid : SV_DispatchThreadID)
 		return;
 	}
 	const float4 C = InputTexture.Load(int3(P, 0));
-	const uint R = (uint)(saturate(C.r) * 255.0);
-	const uint G = (uint)(saturate(C.g) * 255.0);
-	const uint B = (uint)(saturate(C.b) * 255.0);
+	const float3 Linear = saturate(C.rgb);
+	const uint R = (uint)(Linear.r * 255.0);
+	const uint G = (uint)(Linear.g * 255.0);
+	const uint B = (uint)(Linear.b * 255.0);
 	const uint ByteBase = (P.y * InputSize.x + P.x) * 3u;
 	OutRgb8.Store(ByteBase, R);
 	OutRgb8.Store(ByteBase + 1u, G);
