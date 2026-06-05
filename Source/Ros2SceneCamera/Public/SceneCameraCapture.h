@@ -4,7 +4,6 @@
 
 class UTextureRenderTarget2D;
 
-/** Persistent GPU RGB8 capture pipeline (compute + pooled readback). */
 class ROS2SCENECAMERA_API FSceneCameraCapture
 {
 public:

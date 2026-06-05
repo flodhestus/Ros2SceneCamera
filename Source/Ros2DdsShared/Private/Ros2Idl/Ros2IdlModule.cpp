@@ -1,4 +1,3 @@
-// Compiles Cyclone DDS IDL-generated C sources as a single translation unit.
 #include "CoreMinimal.h"
 
 THIRD_PARTY_INCLUDES_START

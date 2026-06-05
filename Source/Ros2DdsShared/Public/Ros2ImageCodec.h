@@ -17,7 +17,6 @@ public:
 		int32 Width,
 		int32 Height,
 		const FString& FrameId);
-	/** Sample.data already contains rgb8 pixels; updates header and dimensions only. */
 	static bool CommitImageMetadata(
 		sensor_msgs_msg_Image& Sample,
 		int32 Width,

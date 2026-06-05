@@ -52,7 +52,7 @@ void ARos2SceneCameraPublisher::BeginPlay()
 
 	SceneCapture->TextureTarget = RenderTarget;
 	SceneCapture->CaptureSource = ESceneCaptureSource::SCS_FinalColorLDR;
-	SceneCapture->bCaptureEveryFrame = bCaptureEveryFrame;
+	SceneCapture->bCaptureEveryFrame = false;
 	SceneCapture->bCaptureOnMovement = false;
 	SceneCapture->bAlwaysPersistRenderingState = true;
 }

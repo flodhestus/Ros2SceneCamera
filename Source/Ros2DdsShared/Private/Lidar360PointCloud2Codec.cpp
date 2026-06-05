@@ -102,6 +102,33 @@ int32 FLidar360PointCloud2Codec::PackFromGpuHits(
 #endif
 }
 
+int32 FLidar360PointCloud2Codec::CommitSensorFrame(
+	sensor_msgs_msg_PointCloud2& Sample,
+	int32 NumPoints,
+	const FString& FrameId)
+{
+#if WITH_LIDAR360_DDS
+	if (NumPoints <= 0 || !Sample.data._buffer)
+	{
+		return 0;
+	}
+	const int32 MaxPoints = static_cast<int32>(Sample.data._maximum / LIDAR360_POINT_BYTES);
+	const int32 Count = FMath::Min(NumPoints, MaxPoints);
+	Sample.height = 1;
+	Sample.width = static_cast<uint32_t>(Count);
+	Sample.row_step = LIDAR360_POINT_BYTES * Sample.width;
+	Sample.data._length = Sample.row_step;
+	Sample.header.stamp.sec = static_cast<int32_t>(FPlatformTime::Seconds());
+	Sample.header.stamp.nanosec = 0;
+	if (Sample.header.frame_id) { dds_free(Sample.header.frame_id); }
+	FTCHARToUTF8 FrameUtf8(*FrameId);
+	Sample.header.frame_id = DupAnsi(FrameUtf8.Get());
+	return Count;
+#else
+	return 0;
+#endif
+}
+
 int32 FLidar360PointCloud2Codec::DecodeToRenderBuffer(
 	const sensor_msgs_msg_PointCloud2& Sample,
 	TArray<float>& OutXyzIntensity,

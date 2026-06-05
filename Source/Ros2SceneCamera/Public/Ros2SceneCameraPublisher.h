@@ -37,7 +37,6 @@ public:
 	UPROPERTY(EditAnywhere, Category = "ROS2 Camera", meta = (ClampMin = "480", ClampMax = "1080"))
 	int32 ImageHeight = ROS2_CAMERA_FULLHD_HEIGHT;
 
-	/** Drive scene capture every frame (pairs with high publish rate). */
 	UPROPERTY(EditAnywhere, Category = "ROS2 Camera")
 	bool bCaptureEveryFrame = true;
 

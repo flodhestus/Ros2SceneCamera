@@ -20,6 +20,10 @@ public:
 		const FVector& Right,
 		const FVector& Up,
 		const FString& FrameId);
+	static int32 CommitSensorFrame(
+		sensor_msgs_msg_PointCloud2& Sample,
+		int32 NumPoints,
+		const FString& FrameId);
 	static int32 DecodeToRenderBuffer(
 		const sensor_msgs_msg_PointCloud2& Sample,
 		TArray<float>& OutXyzIntensity,
