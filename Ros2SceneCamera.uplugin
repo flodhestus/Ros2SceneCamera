@@ -3,7 +3,7 @@
 	"Version": 1,
 	"VersionName": "1.0.0",
 	"FriendlyName": "ROS2 Scene Camera",
-	"Description": "Standalone scene camera with compute-shader capture, CycloneDDS sensor_msgs/Image publish/subscribe, and live viewer on Play.",
+	"Description": "Standalone scene camera with integrated Ros2DdsShared (CycloneDDS Image) and compute-shader capture on Play.",
 	"Category": "Sensors",
 	"CanContainContent": true,
 	"IsBetaVersion": false,
@@ -12,7 +12,7 @@
 	"SupportedTargetPlatforms": [ "Win64" ],
 	"Modules": [
 		{
-			"Name": "Ros2SceneCameraDds",
+			"Name": "Ros2DdsSharedCamera",
 			"Type": "Runtime",
 			"LoadingPhase": "PreDefault",
 			"PlatformAllowList": [ "Win64" ]

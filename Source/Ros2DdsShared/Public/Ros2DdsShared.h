@@ -3,7 +3,7 @@
 #include "CoreMinimal.h"
 #include "Modules/ModuleManager.h"
 
-class FRos2SceneCameraDdsModule : public IModuleInterface
+class FRos2DdsSharedModule : public IModuleInterface
 {
 public:
 	virtual void StartupModule() override;

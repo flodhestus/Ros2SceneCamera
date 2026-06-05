@@ -1,4 +1,4 @@
-
+#include "Lidar360PointCloud2Subscriber.h"
 #include "Lidar360Dds.h"
 #include "Lidar360PointCloud2Codec.h"
 #include "Lidar360Win32Viewport.h"

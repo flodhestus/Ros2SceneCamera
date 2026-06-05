@@ -36,8 +36,8 @@ namespace
 	FString ResolveConfigUri(const FString& PreferredPlugin)
 	{
 		static const TCHAR* Candidates[] = {
-			TEXT("Ros2SceneCamera")
-		};
+		TEXT("Ros2SceneCamera")
+	};
 
 		const FString PreferredUri = ConfigUriForPlugin(PreferredPlugin);
 		if (!PreferredUri.IsEmpty())

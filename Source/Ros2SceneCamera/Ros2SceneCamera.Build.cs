@@ -13,7 +13,7 @@ public class Ros2SceneCamera : ModuleRules
 
 		PublicDependencyModuleNames.AddRange(new[]
 		{
-			"Core", "CoreUObject", "Engine", "RenderCore", "RHI", "Renderer", "Ros2SceneCameraDds"
+			"Core", "CoreUObject", "Engine", "RenderCore", "RHI", "Renderer", "Ros2DdsSharedCamera"
 		});
 
 		PrivateDependencyModuleNames.Add("Projects");

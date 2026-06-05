@@ -1,9 +1,9 @@
 using UnrealBuildTool;
 using System.IO;
 
-public class Ros2SceneCameraDds : ModuleRules
+public class Ros2DdsSharedCamera : ModuleRules
 {
-	public Ros2SceneCameraDds(ReadOnlyTargetRules Target) : base(Target)
+	public Ros2DdsShared(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 		CppStandard = CppStandardVersion.Cpp20;

@@ -5,7 +5,7 @@
 class UWorld;
 
 /** Selects active sensor backends and ensures a single CycloneDDS participant per process. */
-class ROS2SCENECAMERADDS_API FRos2SensorCoordinator
+class ROS2DDSSHAREDCAMERA_API FRos2SensorCoordinator
 {
 public:
 	static bool IsOptiXLidarEnabled();

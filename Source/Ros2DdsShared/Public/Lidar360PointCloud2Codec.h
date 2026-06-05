@@ -7,7 +7,7 @@
 struct sensor_msgs_msg_PointCloud2;
 #endif
 
-class ROS2SCENECAMERADDS_API FLidar360PointCloud2Codec
+class ROS2DDSSHAREDCAMERA_API FLidar360PointCloud2Codec
 {
 public:
 	static void InitSampleFields(sensor_msgs_msg_PointCloud2& Sample);

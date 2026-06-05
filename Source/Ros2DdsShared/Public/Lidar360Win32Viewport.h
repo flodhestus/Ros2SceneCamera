@@ -3,7 +3,7 @@
 #include "CoreMinimal.h"
 #include "HAL/Runnable.h"
 
-class ROS2SCENECAMERADDS_API FLidar360Win32Viewport : public FRunnable, public TSharedFromThis<FLidar360Win32Viewport>
+class ROS2DDSSHAREDCAMERA_API FLidar360Win32Viewport : public FRunnable, public TSharedFromThis<FLidar360Win32Viewport>
 {
 public:
 	FLidar360Win32Viewport();

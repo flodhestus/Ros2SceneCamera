@@ -1,11 +1,11 @@
-#include "Ros2SceneCameraDds.h"
+#include "Ros2DdsShared.h"
 #include "Engine/Engine.h"
 #include "Lidar360Dds.h"
 #include "Ros2SensorCoordinator.h"
 
-IMPLEMENT_MODULE(FRos2SceneCameraDdsModule, Ros2SceneCameraDds)
+IMPLEMENT_MODULE(FRos2DdsSharedModule, Ros2DdsSharedCamera)
 
-void FRos2SceneCameraDdsModule::StartupModule()
+void FRos2DdsSharedModule::StartupModule()
 {
 	FWorldDelegates::OnPIEStarted.AddLambda([](const bool)
 	{
@@ -23,7 +23,7 @@ void FRos2SceneCameraDdsModule::StartupModule()
 	});
 }
 
-void FRos2SceneCameraDdsModule::ShutdownModule()
+void FRos2DdsSharedModule::ShutdownModule()
 {
 	FLidar360Dds::Shutdown();
 }

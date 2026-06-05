@@ -9,7 +9,7 @@ struct sensor_msgs_msg_PointCloud2;
 struct sensor_msgs_msg_Image;
 #endif
 
-class ROS2SCENECAMERADDS_API FLidar360Dds
+class ROS2DDSSHAREDCAMERA_API FLidar360Dds
 {
 public:
 	static bool Init(const FString& PluginName = TEXT("Ros2SceneCamera"));

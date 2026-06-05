@@ -6,7 +6,7 @@
 #include "Lidar360PointCloud2Subscriber.generated.h"
 
 UCLASS()
-class ROS2SCENECAMERADDS_API ALidar360PointCloud2Subscriber : public AActor
+class ROS2DDSSHAREDCAMERA_API ALidar360PointCloud2Subscriber : public AActor
 {
 	GENERATED_BODY()
 
@@ -23,7 +23,7 @@ public:
 	FString TopicName = TEXT("rt/sensor_pointcloud");
 
 	UPROPERTY(EditAnywhere, Category = "LiDAR360")
-	FString PluginName = TEXT("Ros2SceneCamera");
+	FString PluginName = TEXT("Lidar360GpuRayTracing");
 
 	UPROPERTY(EditAnywhere, Category = "LiDAR360")
 	FString ViewportTitle = TEXT("LiDAR360 Point Cloud");

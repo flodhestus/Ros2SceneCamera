@@ -6,7 +6,7 @@
 struct sensor_msgs_msg_Image;
 #endif
 
-class ROS2SCENECAMERADDS_API FRos2ImageCodec
+class ROS2DDSSHAREDCAMERA_API FRos2ImageCodec
 {
 public:
 #if WITH_ROS2_DDS
