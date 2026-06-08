@@ -36,7 +36,7 @@ namespace
 	FString ResolveConfigUri(const FString& PreferredPlugin)
 	{
 		static const TCHAR* Candidates[] = {
-		TEXT("Ros2SceneCamera")
+		TEXT("unreal_gpu_camera")
 	};
 
 		const FString PreferredUri = ConfigUriForPlugin(PreferredPlugin);

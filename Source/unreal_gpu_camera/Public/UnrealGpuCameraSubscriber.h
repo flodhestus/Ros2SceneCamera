@@ -2,16 +2,16 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "Ros2SceneCameraTypes.h"
-#include "Ros2SceneCameraSubscriber.generated.h"
+#include "UnrealGpuCameraTypes.h"
+#include "UnrealGpuCameraSubscriber.generated.h"
 
 UCLASS()
-class ROS2SCENECAMERA_API ARos2SceneCameraSubscriber : public AActor
+class UNREAL_GPU_CAMERA_API AUnrealGpuCameraSubscriber : public AActor
 {
 	GENERATED_BODY()
 
 public:
-	ARos2SceneCameraSubscriber();
+	AUnrealGpuCameraSubscriber();
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 

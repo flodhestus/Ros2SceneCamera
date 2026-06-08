@@ -3,7 +3,7 @@
 #include "CoreMinimal.h"
 #include "HAL/Runnable.h"
 
-class ROS2SCENECAMERA_API FRos2ImageViewport : public FRunnable
+class UNREAL_GPU_CAMERA_API FRos2ImageViewport : public FRunnable
 {
 public:
 	FRos2ImageViewport();

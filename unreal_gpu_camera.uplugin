@@ -2,13 +2,12 @@
 	"FileVersion": 3,
 	"Version": 1,
 	"VersionName": "1.0.0",
-	"FriendlyName": "ROS2 Scene Camera",
-	"Description": "Standalone scene camera with integrated Ros2DdsShared (CycloneDDS Image) and compute-shader capture on Play.",
+	"FriendlyName": "Unreal GPU Camera",
+	"Description": "Very fast",
 	"Category": "Sensors",
 	"CanContainContent": true,
 	"IsBetaVersion": false,
 	"Installed": false,
-	"EngineVersion": "5.7.0",
 	"SupportedTargetPlatforms": [ "Win64" ],
 	"Modules": [
 		{
@@ -18,14 +17,14 @@
 			"PlatformAllowList": [ "Win64" ]
 		},
 		{
-			"Name": "Ros2SceneCamera",
+			"Name": "unreal_gpu_camera",
 			"Type": "Runtime",
 			"LoadingPhase": "Default",
 			"PlatformAllowList": [ "Win64" ]
 		}
 	],
 	"AdditionalFilesToPackage": [
-		"Shaders/Ros2SceneCamera/Private/SceneCameraCapture.usf",
+		"Shaders/unreal_gpu_camera/Private/SceneCameraCapture.usf",
 		"Config/CycloneDDS.xml"
 	]
 }

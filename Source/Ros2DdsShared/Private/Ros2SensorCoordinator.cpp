@@ -21,7 +21,7 @@ bool FRos2SensorCoordinator::IsGpuLidarEnabled()
 
 bool FRos2SensorCoordinator::IsSceneCameraEnabled()
 {
-	return IsPluginEnabled(TEXT("Ros2SceneCamera"));
+	return IsPluginEnabled(TEXT("unreal_gpu_camera"));
 }
 
 bool FRos2SensorCoordinator::ShouldRunOptiXLidar()

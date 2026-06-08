@@ -12,7 +12,7 @@ struct sensor_msgs_msg_Image;
 class ROS2DDSSHAREDCAMERA_API FLidar360Dds
 {
 public:
-	static bool Init(const FString& PluginName = TEXT("Ros2SceneCamera"));
+	static bool Init(const FString& PluginName = TEXT("unreal_gpu_camera"));
 	static void Shutdown();
 	static bool IsInitialized();
 

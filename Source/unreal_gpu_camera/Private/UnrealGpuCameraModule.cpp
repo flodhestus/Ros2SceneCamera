@@ -1,14 +1,14 @@
-#include "Ros2SceneCamera.h"
+#include "UnrealGpuCamera.h"
 #include "Engine/Engine.h"
 #include "Engine/World.h"
 #include "EngineUtils.h"
 #include "Interfaces/IPluginManager.h"
 #include "Misc/Paths.h"
-#include "Ros2SceneCameraPublisher.h"
-#include "Ros2SceneCameraSubscriber.h"
+#include "UnrealGpuCameraPublisher.h"
+#include "UnrealGpuCameraSubscriber.h"
 #include "Ros2SensorCoordinator.h"
 
-IMPLEMENT_MODULE(FRos2SceneCameraModule, Ros2SceneCamera)
+IMPLEMENT_MODULE(FUnrealGpuCameraModule, unreal_gpu_camera)
 
 static void SpawnPublisher(UWorld* World)
 {
@@ -16,8 +16,8 @@ static void SpawnPublisher(UWorld* World)
 	{
 		return;
 	}
-	for (TActorIterator<ARos2SceneCameraPublisher> It(World); It; ++It) { return; }
-	World->SpawnActor<ARos2SceneCameraPublisher>();
+	for (TActorIterator<AUnrealGpuCameraPublisher> It(World); It; ++It) { return; }
+	World->SpawnActor<AUnrealGpuCameraPublisher>();
 }
 
 static void SpawnSubscriber(UWorld* World)
@@ -26,16 +26,16 @@ static void SpawnSubscriber(UWorld* World)
 	{
 		return;
 	}
-	for (TActorIterator<ARos2SceneCameraSubscriber> It(World); It; ++It) { return; }
-	World->SpawnActor<ARos2SceneCameraSubscriber>();
+	for (TActorIterator<AUnrealGpuCameraSubscriber> It(World); It; ++It) { return; }
+	World->SpawnActor<AUnrealGpuCameraSubscriber>();
 }
 
-void FRos2SceneCameraModule::StartupModule()
+void FUnrealGpuCameraModule::StartupModule()
 {
 	const FString ShaderDir = FPaths::Combine(
-		IPluginManager::Get().FindPlugin(TEXT("Ros2SceneCamera"))->GetBaseDir(),
-		TEXT("Shaders/Ros2SceneCamera/Private"));
-	AddShaderSourceDirectoryMapping(TEXT("/Ros2SceneCameraShaders"), ShaderDir);
+		IPluginManager::Get().FindPlugin(TEXT("unreal_gpu_camera"))->GetBaseDir(),
+		TEXT("Shaders/unreal_gpu_camera/Private"));
+	AddShaderSourceDirectoryMapping(TEXT("/UnrealGpuCameraShaders"), ShaderDir);
 
 	FWorldDelegates::OnPIEStarted.AddLambda([](const bool)
 	{
@@ -52,4 +52,4 @@ void FRos2SceneCameraModule::StartupModule()
 	});
 }
 
-void FRos2SceneCameraModule::ShutdownModule() {}
+void FUnrealGpuCameraModule::ShutdownModule() {}

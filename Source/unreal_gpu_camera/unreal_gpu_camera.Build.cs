@@ -1,9 +1,9 @@
 using UnrealBuildTool;
 using System.IO;
 
-public class Ros2SceneCamera : ModuleRules
+public class unreal_gpu_camera : ModuleRules
 {
-	public Ros2SceneCamera(ReadOnlyTargetRules Target) : base(Target)
+	public unreal_gpu_camera(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 		CppStandard = CppStandardVersion.Cpp20;
@@ -16,6 +16,6 @@ public class Ros2SceneCamera : ModuleRules
 			"Core", "CoreUObject", "Engine", "RenderCore", "RHI", "Renderer", "Ros2DdsSharedCamera"
 		});
 
-		PrivateDependencyModuleNames.Add("Projects");
+		PrivateDependencyModuleNames.AddRange(new[] { "Projects", "RHICore" });
 	}
 }
