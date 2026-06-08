@@ -1,4 +1,4 @@
-# ROS2 Scene Camera
+# ComputeShader-Camera
 
 Win64 UE 5.7 plugin: HDR scene camera with compute-shader RGB8 export, CycloneDDS `sensor_msgs/Image`, and a live preview on Play.
 
