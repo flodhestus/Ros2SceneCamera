@@ -43,9 +43,4 @@ S
 
 1. Copy into `YourProject/Plugins/`.
 2. Enable **ROS2 Scene Camera**.
-3. Press Play.
-
-## Related plugins
-
-- [Lidar360GpuRayTracing](https://github.com/flodhestus/Lidar360GpuRayTracing) — D3D12 RT LiDAR  
-- [Lidar360OptiX](https://github.com/flodhestus/Lidar360OptiX) — OptiX LiDAR  
+3. Press Play. 
